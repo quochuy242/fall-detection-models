@@ -1,32 +1,88 @@
 import os
-from typing import Optional
+import subprocess
+from pathlib import Path
+from typing import Optional, Dict, List
 
-import gdown
+import cv2
+from datasets import load_dataset
 from torch.utils.data import DataLoader, Dataset
 
 
 class ViFam(Dataset):
-    def __init__(self, root_dir: str, download: bool, transform=None):
+    def __init__(self, root_dir: str, transform=None):
+        super().__init__()
+        self.root_dir = Path(root_dir)
+        self.transform = transform
+        
+        self.vid_paths = []
+        self.labels = []
+    
+    @property
+    def _get_label(self):
+        for label in self.root_dir.iterdir():
+            # Check if the subpath is directory
+            if not label.is_dir():
+                print(f'Error: The datasets\' structure are not right. The {label} is not directory')
+                continue
+            else:
+                self.labels.append(label.name)
+                
+        self.label2idx: Dict = {label: idx for idx, label in enumerate(self.labels)}
+        self.idx2label: Dict = {idx: label for idx, label in enumerate(self.labels)}
+                
+    @property
+    def _get_path(self):
+        for label in self.labels:
+            label_dir = self.root_dir / label
+            videos: List = list(label_dir.glob('**.*'))
+            
+            
+            
+            
+            
+class ViFamImageCls(Dataset):
+    def __init__(self, root_dir: str, transform=None):
+        super().__init__()
         self.root_dir = root_dir
         self.transform = transform
-        self.download = download
+        
+        self.vid_path = []
+        self.label = []
 
-    def download_dataset(
-        self,
-        drive_url: str = "https://drive.google.com/drive/folders/1EHADrJ7p4Jt-rZcduCPyYtf9TI1zYlUr",
-        user_agent: Optional[
-            str
-        ] = "Mozilla/5.0 (X11; Linux x86_64; rv:131.0) Gecko/20100101 Firefox/131.0",
-    ) -> None:
-        os.makedirs(self.root_dir, exist_ok=True)
 
-        if self.download:
-            gdown.download_folder(
-                url=drive_url,
-                output=self.root_dir,
-                user_agent=user_agent,
-            )
-        return None
+class ViFamVideoCls(Dataset):
+    def __init__(self, root_dir, transform=None) -> None:
+        super().__init__()
 
-    def extract_dataset(self, ):
-        pass
+
+def download_dataset(root_dir: str | Path) -> None:
+    # Check if the path is valid
+    root_dir = Path(root_dir)
+    if not root_dir.exists():
+        print(f"Error: The specified directory '{root_dir}' does not exist.")
+        return
+    if not root_dir.is_dir():
+        print(f"Error: The specified path '{root_dir}' is not a directory.")
+        return
+
+    # Check if git and git-lfs are installed
+    try:
+        subprocess.run(["git", "--version"], check=True, stdout=subprocess.PIPE)
+        subprocess.run(["git", "lfs", "--version"], check=True, stdout=subprocess.PIPE)
+    except subprocess.CalledProcessError:
+        # Install git and git lfs
+        print(
+            "Git or Git LFS is not installed. Please install them before proceeding it"
+        )
+        return
+
+    # Attempt to clone the repository
+    try:
+        subprocess.run(
+            f"git clone https://huggingface.co/datasets/qhuy242/vifam {root_dir}",
+            shell=True,
+            check=True,
+        )
+        print("Dataset downloaded successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error: Failed to clone repository. {e}")
