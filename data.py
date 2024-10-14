@@ -1,12 +1,12 @@
 import os
 import subprocess
 from pathlib import Path
-from typing import Optional, Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import cv2
 import numpy as np
-
 from datasets import load_dataset
+from rich import print
 from torch.utils.data import DataLoader, Dataset
 
 
@@ -84,6 +84,7 @@ class ViFamImageCls(ViFam):
         return gray_img, label
 
 
+# TODO: Write a dataset class for video recognition
 class ViFamVideoCls(ViFam):
     def __init__(self, root_dir, transform=None) -> None:
         super().__init__()

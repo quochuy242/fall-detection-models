@@ -1,5 +1,9 @@
 from pydantic import BaseModel, field_validator
 from typing import List, Tuple, Dict, Optional
+from loguru import logger
+import sys
+
+logger.add(sys.stderr, format="{time:MMMM D, YYYY > HH:mm:ss} | {level} | {message}")
 
 
 class CNNArgument(BaseModel):
@@ -29,4 +33,5 @@ class CNNArgument(BaseModel):
         return v
 
 
+# TODO: Complete the arguments for ViT model
 class ViTArgument(BaseModel): ...

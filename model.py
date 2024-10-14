@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from typing import List
 import numpy as np
 from config import CNNArgument, ViTArgument
@@ -68,3 +67,7 @@ class CNN(nn.Module):
         x = torch.flatten(x, 1)
         x = self.classifier(x)
         return x
+
+
+# TODO: Write ViT model class here
+class ViT(nn.Module): ...
