@@ -1,8 +1,10 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from typing import List
 import numpy as np
-from config import CNNArgument, ViTArgument
+from src.config import CNNArgument, ViTArgument, logger
+from torch.utils.data import DataLoader
 
 
 class CNN(nn.Module):
@@ -71,3 +73,33 @@ class CNN(nn.Module):
 
 # TODO: Write ViT model class here
 class ViT(nn.Module): ...
+
+
+def save_model(model: nn.Module, path: str) -> None:
+    torch.save(model.state_dict(), path)
+    logger.info(f"Model saved to {path}")
+
+
+def test(model: nn.Module, images: , device: torch.device = "cpu") -> None:
+    # Set model to evaluation mode and move to device
+    model.eval()
+    model.to(device)
+
+    # Set loss function
+    criterion = nn.CrossEntropyLoss()
+
+    # Disable gradient calculation
+    with torch.inference_mode():
+        for batch in test_data:
+            inputs, labels = batch
+
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+
+            # Forward pass
+            outputs = model(inputs)
+
+            # Calculate loss
+
+            # Print loss
+            print(f"Test loss: {loss.item()}")
